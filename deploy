@@ -1,0 +1,53 @@
+#!/usr/bin/php
+<?php
+$in = [];
+$out = [];
+$sep = false;
+array_shift($argv);
+foreach ($argv as $av)
+{
+  if ($av == "!")
+  {
+    if ($sep)
+    {
+       echo "Multiple separators found. Stopping.\n";
+       exit(1);
+    }
+    $sep = true;
+    continue ;
+  }
+  if (!$sep)
+    $in[] = $av;
+  else
+    $out[] = $av;
+}
+
+if (count($out) == 0)
+{
+  if ($sep)
+  {
+    echo "No targets specified after separator. Stopping.\n";
+    exit(1);
+  }
+  $out[] = array_pop($in);
+}
+
+foreach ($out as $ot)
+{
+    if (!is_dir($ot))
+    {
+      echo "Output $av is not a directory. Stopping.\n";
+      exit(1);
+    }
+}
+
+$progress = 0;
+$elems = count($in);
+$in = implode(" ", $in);
+foreach ($out as $ot)
+{
+  echo shell_exec("cp -vr $in $ot");
+  $progress += $elems;
+  echo "$progress/".($elems*count($out))."\n";
+}
+echo "Deploy's done.\n";
