@@ -4,8 +4,14 @@ $in = [];
 $out = [];
 $sep = false;
 array_shift($argv);
+$ignore_not_dir = false;
 foreach ($argv as $av)
 {
+  if ($av == '-f')
+  {
+    $ignore_not_dir = true;
+    continue ;
+  }
   if ($av == "!")
   {
     if ($sep)
@@ -32,12 +38,15 @@ if (count($out) == 0)
   $out[] = array_pop($in);
 }
 
-foreach ($out as $ot)
+if ($ignore_not_dir == false)
 {
-    if (!is_dir($ot))
+    foreach ($out as $ot)
     {
-      echo "Output $av is not a directory. Stopping.\n";
-      exit(1);
+        if (!is_dir($ot))
+        {
+          echo "Output $av is not a directory. Stopping.\n";
+          exit(1);
+        }
     }
 }
 
@@ -46,7 +55,8 @@ $elems = count($in);
 $in = implode(" ", $in);
 foreach ($out as $ot)
 {
-  echo shell_exec("cp -vr $in $ot");
+  if (is_dir($ot))
+     echo shell_exec("cp -vr $in $ot");
   $progress += $elems;
   echo "$progress/".($elems*count($out))."\n";
 }
